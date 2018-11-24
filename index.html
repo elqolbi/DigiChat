@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>DigiChat</title>
+  <style>
+    html, body {
+      position: relative;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #000;
+      font-family: Verdana, sans-serif;
+    }
+    .hide {
+      display: none;
+    }
+    h1 {
+      text-align: center;
+      color: #fff;
+      margin: 0;
+      font-size: 2vw;
+      padding: 1vw;
+      background: #000;
+      z-index: 2;
+    }
+    .box {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      left: 50%;
+      top: 50%;
+      width: calc(100% - 10vw);
+      max-width: 500px;
+      height: calc(100% - 4vw);
+      background: #e0e0e0;
+    }
+    ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    input, button {
+      padding: 5px 7px;
+    }
+
+    #online-user {
+      background: grey;
+      color: #fff;
+      width: 35%;
+    }
+    #online-user .logout {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      padding: 10px 0;
+      width: 100%;
+      text-align: center;
+      font-size: .8rem;
+      font-weight: bold;
+    }
+    #online-user .logout:hover {
+      color: orange;
+    }
+    #online-user .content-wrapper::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+    #online-user span {
+      display: inline-block;
+      font-size: .8rem;
+      font-weight: bold;
+      margin-bottom: 1vw;
+    }
+    #online-user li {
+      padding: .2vw 0;
+      font-size: .9rem;
+    }
+
+    #online-user, .chat-box {
+      position: absolute;
+      top: 4vw;
+      bottom: 0;
+      z-index: -1;
+      word-wrap: break-word;
+    }
+    .content-wrapper {
+      padding: 1.3vw 1vw 1vw;
+      overflow-y: scroll;
+    }
+
+    .chat-box {
+      width: 65%;
+      left: 35%;
+    }
+    .chat-box .login {
+      position: absolute;
+      top: 45%;
+      transform: translateY(-50%);
+      text-align: center;
+    }
+    .chat-box .login input{
+      width: calc(100% - 60px);
+      margin-bottom: 3px;
+    }
+    .chat-box .login button {
+      width: calc(100% - 42px);
+      margin-top: 3px;
+    }
+    .chat-box .login p {
+      font-size: .8rem;
+      color: red;
+    }
+    .chat-box li {
+      margin-bottom: 1vw;
+      overflow: hidden;
+    }
+    .chat-box li .bulk {
+      display: inline-block;
+      width: 100%;
+    }
+    .chat-box li .username {
+      font-size: .7rem;
+      font-weight: bold;
+      margin-bottom: 2px;
+      word-wrap: break-word;
+    }
+    .chat-box li .balloon {
+      position: relative;
+      word-wrap: break-word;
+      float: left;
+      max-width: calc(100% - 60px);
+      padding: 5px 10px;
+      border-radius: 7px;
+      background: #cddc39;
+    }
+    .chat-box li.me .balloon {
+      background: #00bcd4;
+    }
+    .chat-box li.me .balloon.sent:after {
+      content: '\2714';
+      bottom: 20px;
+      position: absolute;
+      left: -16px;
+      font-size: .7rem;
+    }
+    .chat-box li.me .username, .chat-box li.me .balloon {
+      float: right;
+    }
+    .chat-box li .time {
+      position: absolute;
+      bottom: 0;
+      right: -40px;
+      font-size: .7rem;
+      line-height: 2.5;
+    }
+    .chat-box li.me .time {
+      left: -40px;
+    }
+    .chat-box li.date-separator {
+      font-size: .7rem;
+      text-align: center;
+    }
+    .chat-box .chat {
+      height: calc(100% - 40px - 2.3vw);
+    }
+    .chat-box #status {
+      position: absolute;
+      top: -32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      padding: 5px 10px;
+      border-radius: 7px;
+      opacity: 0;
+      visibility: hidden;
+      font-size: .8rem;
+      transition: .3s;
+    }
+    .chat-box #status.active {
+      opacity: .8;
+      visibility: visible;
+    }
+    .chat-box .msg-box {
+      position: relative;
+      height: 40px;
+      background: aqua;
+    }
+    .chat-box .msg-box .msg-wrapper {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100%;
+      text-align: center;
+    }
+    .chat-box .msg-box input {
+      width: calc(100% - 90px);
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 6vw;
+        padding: 3vw;
+      }
+      .box {
+        height: 100%;
+        width: 100%;
+      }
+
+      #online-user, .chat-box {
+        top: 12vw;
+      }
+      #online-user li {
+        padding: .8vw 0;
+        font-size: .9rem;
+      }
+
+      .content-wrapper {
+        padding: 3.6vw 3vw 3vw;
+      }
+
+      .chat-box li {
+        margin-bottom: 3vw;
+      }
+      .chat-box .chat {
+        height: calc(100% - 40px - 6.6vw);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="box">
+      <h1>DigiChat</h1>
+      <div id="online-user">
+        <div class="content-wrapper">
+          <span>Online Users</span>
+          <ul id="onlineuser">
+          </ul>
+          <div class="logout" onclick="deleteCookie('member')">Logout</div>
+        </div>
+      </div>
+      <div class="chat-box hide" id="chatBox">
+        <div class="content-wrapper chat" id="messages-wrap">
+          <ul id="messages">
+            <!-- <li>
+              <div class="username">habibnoerq</div>
+              <div class="bulk">
+                <div class="balloon">HalooooHalooooHalooooHalooooHaloooo<div class="time">24:55</div></div>
+              </div>
+            </li>
+            <li class="date-separator">28 November 2018</li>
+            <li>
+              <div class="username">habibnoerq</div>
+              <div class="bulk">
+                <div class="balloon">HalooooHalooooHalooooHalooooHaloooo<div class="time">24:55</div></div>
+              </div>
+            </li>
+            <li>
+              <div class="username">habibnoerq</div>
+              <div class="bulk">
+                <div class="balloon">HalooooHalooooHalooooHalooooHaloooo<div class="time">24:55</div></div>
+              </div>
+            </li>
+            <li>
+              <div class="username">habibnoerq</div>
+              <div class="bulk">
+                <div class="balloon">HalooooHalooooHalooooHalooooHaloooo<div class="time">24:55</div></div>
+              </div>
+            </li>
+            <li class="me">
+              <div class="username">habibnoerq</div>
+              <div class="bulk">
+                <div class="balloon sent">HalooooHalooooHalooooHalooooHaloooo<div class="time">24:55</div></div>
+              </div>
+            </li>
+            <li class="me">
+              <div class="username">habibnoerq</div>
+              <div class="bulk">
+                <div class="balloon sent">HalooooHalooooHalooooHalooooHaloooo<div class="time">24:55</div></div>
+              </div>
+            </li>
+            <li class="me">
+              <div class="username">habibnoerq</div>
+              <div class="bulk">
+                <div class="balloon sent">HalooooHalooooHalooooHalooooHaloooo<div class="time">24:55</div></div>
+              </div>
+            </li>
+            <li class="me">
+              <div class="username">habibnoerq</div>
+              <div class="bulk">
+                <div class="balloon sent">HalooooHalooooHalooooHalooooHaloooo<div class="time">24:55</div></div>
+              </div>
+            </li> -->
+          </ul>
+        </div>
+        <div class="msg-box">
+          <div id="status"></div>
+          <div class="msg-wrapper">
+            <input type="text" id="newMessages">
+            <button id="sendMessage">Send</button>
+          </div>
+        </div>
+      </div>
+      <div class="chat-box" id="logBox">
+        <div class="login">
+          <h3>Login/Register</h3>
+          <p id="notice"></p>
+          <input type="text" placeholder="Username" id="username">
+          <input type="password" placeholder="Password" id="password">
+          <button onclick="sign()">Go</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+  <script>    
+    var element = function(id) {
+      return document.getElementById(id);
+    }
+
+    // Toggle Logbox
+    var logoff = function(s) {
+      if (s) {
+        chatBox.classList.add('hide');
+        logBox.classList.remove('hide');
+      } else {
+        chatBox.classList.remove('hide');
+        logBox.classList.add('hide');
+      }
+    }
+
+    var logBox = element('logBox');
+    var chatBox = element('chatBox');
+    var onlineUser = element('onlineuser');
+    var loginButton = element('login');
+    var notice = element('notice');
+    var stats = element('status');
+    var messages = element('messages');
+    var msgwrap = element('messages-wrap');
+    var newMessages = element('newMessages');
+    var username = element('username');
+    var password = element('password');
+    var send = element('sendMessage');
+
+    const http = new XMLHttpRequest();
+    const url = 'http://localhost:3232';
+
+    function getCookie(cname) {
+      var name = cname + "=";
+      var decodedCookie = decodeURIComponent(document.cookie);
+      var ca = decodedCookie.split(';');
+      for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return JSON.parse(c.substring(name.length, c.length));
+        }
+      }
+      return "";
+    }
+
+    function setCookie(cname, cvalue, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      var expires = "expires="+d.toUTCString();
+      document.cookie = cname + "=" + JSON.stringify(cvalue) + ";" + expires + ";path=/";
+    }
+
+    function deleteCookie(cname) {
+      document.cookie = cname + "='';expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+      location.reload();
+    }
+
+    function sign() {
+      if (username.value == '' || password.value == '') {
+        notice.innerText = 'Please insert a username and password!'
+      } else {
+        http.open('POST', url + '/sign');
+        http.setRequestHeader("Content-Type", "application/json");
+        http.send(JSON.stringify({
+          username: username.value,
+          password: password.value
+        }));
+        http.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            var res = JSON.parse(this.responseText);
+            setCookie('member', res.data, res.exp);
+            location.reload();
+          } else {
+            var res = JSON.parse(this.responseText);
+            if (!res.success) {
+              notice.innerText = res.message;
+            }
+          }
+        };
+      }
+    }
+
+    (function() {
+      var member = getCookie('member');
+
+      // Connect to Socket.io
+      var socket = io.connect(url);
+
+      // Check for connection
+      if (socket !== undefined) {
+        console.log('Connected to socket');
+
+        // Check Signin Status
+        if (member !== '') {
+          socket.emit('signCheck', {
+            username: member.username,
+            token: member.token
+          });
+
+          // Show ChatBox
+          logoff(false);
+        } else {
+          // Show LogBox
+          logoff(true);
+        }
+
+        // (Receive) Handle Signin
+        socket.on('signStatus', function(data) {
+          if (!data.auth) {
+            // Show LogBox
+            logoff(true);
+          }
+        });
+
+        // Notice
+        socket.on('notice', function(data) {
+          notice.innerText = data;
+        });
+
+        // Status
+        socket.on('status', function(data) {
+          stats.innerText = data.message;
+          if (data.clear) {
+            newMessages.value = '';
+          }
+          stats.classList.add('active');
+          setInterval(function() {
+            stats.classList.remove('active');
+          }, 3000);
+        });
+
+        // Online User
+        socket.on('onlineuser', function(data) {
+          var onUser = document.createElement('li');
+            onUser.textContent = data;
+            onlineUser.appendChild(onUser);
+        });
+
+        // Handle Output
+        socket.on('output', function(data) {
+          if (data.length) {
+            for (var x = 0; x < data.length; x++) {
+              // Build out message div
+              var mUsername = document.createElement('div');
+                mUsername.setAttribute('class', 'username');
+                mUsername.textContent = data[x].username;
+
+              var mBulk = document.createElement('div');
+                mBulk.setAttribute('class', 'bulk');
+
+              var mBalloon = document.createElement('div');
+                mBalloon.setAttribute('class', 'balloon');
+                mBalloon.textContent = data[x].message;
+
+              var mTime = document.createElement('div');
+                mTime.setAttribute('class', 'time');
+                mTime.textContent = data[x].time;
+
+                mBalloon.appendChild(mTime);
+                mBulk.appendChild(mBalloon);
+
+              var mList = document.createElement('li');
+                if (data[x].username === member.username) {
+                  mList.setAttribute('class', 'me');
+                }
+                mList.appendChild(mUsername);
+                mList.appendChild(mBulk);
+
+              messages.appendChild(mList);
+              msgwrap.scrollTop = msgwrap.scrollHeight;
+            }
+          }
+        });
+
+        // Get status from server
+        // socket.on('status', function(data) {
+        //   // Get message status
+        //   setStatus((typeof data === 'object')? data.message : data);
+
+        //   // If status is clear, clear text
+        //   if (data.clear) {
+        //     newMessages.value = '';
+        //   }
+        // })
+
+        // Handle input
+        sendMessage.addEventListener('click', function() {
+          // Emit to server input
+          socket.emit('input', {
+            username: member.username,
+            token: member.token,
+            message: newMessages.value
+          });
+
+          event.preventDefault();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
