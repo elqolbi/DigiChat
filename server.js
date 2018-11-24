@@ -1,5 +1,5 @@
 // Connection URL
-const url = 'mongodb://127.0.0.1:27017';
+const url = 'mongodb://digichat:6vAyVHGQAYAgzpyCvCpkFLtlMnDLl87wvYCVOCxPrTDQON5wAWNevWoT2FcgEOXuf3fqQnaI7CuvF8VjbZjpOA==@digichat.documents.azure.com:10255/?ssl=true&replicaSet=globaldb';
 const dbName = 'digichat';
 const port = process.env.PORT || 3232;
 
